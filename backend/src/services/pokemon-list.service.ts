@@ -42,13 +42,19 @@ export async function getPokemonList(params: GetPokemonListParams) {
     countPokemon(search || undefined),
   ]);
 
+  if (items.length === 0) {
+    return {
+      items,
+      pagination: { page, limit, total, hasMore: false },
+    };
+  }
+
+  const hasMore = search
+    ? offset + items.length < total
+    : items.length === limit;
+
   return {
     items,
-    pagination: {
-      page,
-      limit,
-      total,
-      hasMore: offset + items.length < total,
-    },
+    pagination: { page, limit, total, hasMore },
   };
 }
