@@ -3,10 +3,14 @@ import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import { connectToMongo, getDb } from "./lib/mongo";
+import { pokemonRouter } from "./routes/pokemon.route";
+import { ensurePokemonIndexes } from "./repositories/pokemon.repository";
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+app.use("/api/pokemon", pokemonRouter);
 
 app.get("/api/health", async (_req, res) => {
   try {
@@ -33,6 +37,8 @@ const PORT = process.env.PORT || 4000;
 async function startServer() {
   try {
     await connectToMongo();
+    await ensurePokemonIndexes();
+
     app.listen(PORT, () => {
       console.log(`Server running on http://localhost:${PORT}`);
     });
