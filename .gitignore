@@ -1,0 +1,17 @@
+# dependencies
+**/node_modules/
+
+# build outputs
+**/dist/
+**/.next/
+**/out/
+
+# env
+**/.env
+**/.env.local
+
+# logs
+**/*.log
+
+# test
+**/coverage/
