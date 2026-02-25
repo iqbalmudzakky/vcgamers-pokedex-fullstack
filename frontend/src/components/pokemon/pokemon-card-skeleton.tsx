@@ -1,4 +1,6 @@
-export function PokemonCardSkeleton() {
+import { memo } from "react";
+
+export const PokemonCardSkeleton = memo(function PokemonCardSkeleton() {
   return (
     <div className="rounded-lg border p-4 animate-pulse">
       <div className="h-20 w-20 rounded bg-slate-200" />
@@ -6,4 +8,4 @@ export function PokemonCardSkeleton() {
       <div className="mt-2 h-3 w-32 rounded bg-slate-200" />
     </div>
   );
-}
+});

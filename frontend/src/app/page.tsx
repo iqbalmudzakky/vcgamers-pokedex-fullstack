@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { useAtom } from "jotai";
 
@@ -29,7 +29,7 @@ export default function HomePage() {
   const { page, hasMore } = pagination;
   const { initialLoading, loadingMore, error } = status;
 
-  async function loadingFirstPage() {
+  const loadingFirstPage = useCallback(async () => {
     try {
       setStatus((prev) => ({ ...prev, initialLoading: true, error: "" }));
       setPagination((prev) => ({ ...prev, page: 1, hasMore: true }));
@@ -57,11 +57,11 @@ export default function HomePage() {
     } finally {
       setStatus((prev) => ({ ...prev, initialLoading: false }));
     }
-  }
+  }, [debouncedSearch, setItems, setPagination, setStatus]);
 
   useEffect(() => {
     void loadingFirstPage();
-  }, [debouncedSearch]);
+  }, [loadingFirstPage]);
 
   async function fetchNextPage() {
     if (loadingMore || initialLoading || !hasMore) return;

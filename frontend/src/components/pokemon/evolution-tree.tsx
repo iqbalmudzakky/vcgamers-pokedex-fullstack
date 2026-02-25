@@ -1,5 +1,7 @@
-import type { EvolutionTree } from "@/types/pokemon";
+import Image from "next/image";
 import Link from "next/link";
+
+import type { EvolutionTree } from "@/types/pokemon";
 
 type Props = {
   evolutionChain: EvolutionTree;
@@ -45,13 +47,15 @@ export function EvolutionTreeNode({ evolutionChain }: Props) {
                   className="px-4 py-2 text-sm font-medium capitalize"
                 >
                   {pokemon.imageUrl ? (
-                    <img
+                    <Image
                       src={pokemon.imageUrl}
                       alt={pokemon.name}
-                      className="mx-auto mb-2 h-20 w-20 object-contain"
+                      width={96}
+                      height={96}
+                      className="mx-auto mb-2 h-24 w-24 object-contain"
                     />
                   ) : (
-                    <div className="mx-auto mb-2 h-16 w-16 rounded bg-slate-100" />
+                    <div className="mx-auto mb-2 h-24 w-24 rounded bg-slate-100" />
                   )}
 
                   <p className="text-center text-sm font-medium capitalize px-2 pb-2">

@@ -1,4 +1,8 @@
-import { ApiResponse, PokemonDetail, PokemonListData } from "@/types/pokemon";
+import type {
+  ApiResponse,
+  PokemonDetail,
+  PokemonListData,
+} from "@/types/pokemon";
 import { api } from "./api";
 
 type GetPokemonListParams = {

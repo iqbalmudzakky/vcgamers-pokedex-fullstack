@@ -1,0 +1,257 @@
+{
+  "info": {
+    "_postman_id": "8f138e41-e8d4-412e-b506-7cbe850d8f71",
+    "name": "VCGamers Pokedex API",
+    "description": "Postman collection for VCGamers Pokedex backend and PokeAPI reference endpoints.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/health",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "health"
+          ]
+        },
+        "event": [
+          {
+            "listen": "test",
+            "script": {
+              "type": "text/javascript",
+              "exec": [
+                "pm.test('Status code is 200', function () {",
+                "  pm.response.to.have.status(200);",
+                "});",
+                "",
+                "const json = pm.response.json();",
+                "pm.test('Response ok = true', function () {",
+                "  pm.expect(json.ok).to.eql(true);",
+                "});"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "Sync Pokemon",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/pokemon/sync?limit=8&offset=0",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "pokemon",
+            "sync"
+          ],
+          "query": [
+            {
+              "key": "limit",
+              "value": "8"
+            },
+            {
+              "key": "offset",
+              "value": "0"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "",
+              "const json = pm.response.json();",
+              "pm.test('Response ok = true', function () {",
+              "  pm.expect(json.ok).to.eql(true);",
+              "});",
+              "",
+              "pm.test('syncedCount exists', function () {",
+              "  pm.expect(json.data).to.have.property('syncedCount');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Pokemon List",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/pokemon?page=1&limit=8&search=bulba",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "pokemon"
+          ],
+          "query": [
+            {
+              "key": "page",
+              "value": "1"
+            },
+            {
+              "key": "limit",
+              "value": "8"
+            },
+            {
+              "key": "search",
+              "value": "bulba"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "",
+              "const json = pm.response.json();",
+              "pm.test('Response ok = true', function () {",
+              "  pm.expect(json.ok).to.eql(true);",
+              "});",
+              "",
+              "pm.test('Has items and pagination', function () {",
+              "  pm.expect(json.data).to.have.property('items');",
+              "  pm.expect(json.data).to.have.property('pagination');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Pokemon Detail",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/pokemon/:name",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "pokemon",
+            ":name"
+          ],
+          "variable": [
+            {
+              "key": "name",
+              "value": "bulbasaur"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "",
+              "const json = pm.response.json();",
+              "pm.test('Detail has required fields', function () {",
+              "  pm.expect(json.data).to.have.property('sprites');",
+              "  pm.expect(json.data).to.have.property('types');",
+              "  pm.expect(json.data).to.have.property('moves');",
+              "  pm.expect(json.data).to.have.property('evolutionChain');",
+              "});",
+              "",
+              "pm.test('Moves max 10', function () {",
+              "  pm.expect(json.data.moves.length).to.be.at.most(10);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PokeAPI List (Reference)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "https://pokeapi.co/api/v2/pokemon?limit=8&offset=0",
+          "protocol": "https",
+          "host": [
+            "pokeapi",
+            "co"
+          ],
+          "path": [
+            "api",
+            "v2",
+            "pokemon"
+          ],
+          "query": [
+            {
+              "key": "limit",
+              "value": "8"
+            },
+            {
+              "key": "offset",
+              "value": "0"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "PokeAPI Detail (Reference)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "https://pokeapi.co/api/v2/pokemon/:name",
+          "protocol": "https",
+          "host": [
+            "pokeapi",
+            "co"
+          ],
+          "path": [
+            "api",
+            "v2",
+            "pokemon",
+            ":name"
+          ],
+          "variable": [
+            {
+              "key": "name",
+              "value": "bulbasaur"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://127.0.0.1:4000/api"
+    }
+  ]
+}

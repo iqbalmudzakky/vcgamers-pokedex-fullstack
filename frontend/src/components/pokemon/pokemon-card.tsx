@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { memo } from "react";
+import Image from "next/image";
 
 import type { PokemonListItem } from "@/types/pokemon";
 
@@ -6,16 +8,18 @@ type Props = {
   pokemon: PokemonListItem;
 };
 
-export function PokemonCard({ pokemon }: Props) {
+export const PokemonCard = memo(function PokemonCard({ pokemon }: Props) {
   return (
     <Link
       href={`/pokemon/${pokemon.name}`}
       className="rounded-lg border p-4 hover:bg-gray-50 transition"
     >
-      <img
+      <Image
         src={pokemon.sprites.front_default ?? ""}
         alt={pokemon.name}
-        className="h-20 w-20 object-contain"
+        width={96}
+        height={96}
+        className="h-24 w-24 object-contain"
       />
       <p className="mt-2 font-semibold capitalize">{pokemon.name}</p>
       <p className="text-sm text-gray-600">
@@ -23,4 +27,4 @@ export function PokemonCard({ pokemon }: Props) {
       </p>
     </Link>
   );
-}
+});

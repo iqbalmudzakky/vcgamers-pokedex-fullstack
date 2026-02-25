@@ -1,9 +1,10 @@
 "use client";
 
 import { useAtom } from "jotai";
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 
 import { getPokemonDetail } from "@/services/pokemon.services";
 import {
@@ -20,7 +21,7 @@ export default function PokemonDetailPage() {
   const [detail, setDetail] = useAtom(pokemonDetailAtom);
   const [status, setStatus] = useAtom(pokemonDetailStatusAtom);
 
-  async function loadPage() {
+  const loadPage = useCallback(async () => {
     try {
       setStatus((prev) => ({ ...prev, loading: true, error: "" }));
 
@@ -34,11 +35,11 @@ export default function PokemonDetailPage() {
     } finally {
       setStatus((prev) => ({ ...prev, loading: false }));
     }
-  }
+  }, [name, setDetail, setStatus]);
 
   useEffect(() => {
     void loadPage();
-  }, [name]);
+  }, [loadPage]);
 
   if (status.loading) {
     return (
@@ -86,17 +87,26 @@ export default function PokemonDetailPage() {
       <h1 className="mb-4 text-2xl font-bold capitalize">{detail.name}</h1>
 
       <section className="mb-4 grid grid-cols-3 gap-4">
-        <img
+        <Image
           src={detail.sprites.front_default ?? ""}
           alt={`${detail.name} front`}
+          width={96}
+          height={96}
+          className="h-24 w-24 object-contain"
         />
-        <img
+        <Image
           src={detail.sprites.back_default ?? ""}
           alt={`${detail.name} back`}
+          width={96}
+          height={96}
+          className="h-24 w-24 object-contain"
         />
-        <img
+        <Image
           src={detail.sprites.front_shiny ?? ""}
           alt={`${detail.name} shiny`}
+          width={96}
+          height={96}
+          className="h-24 w-24 object-contain"
         />
       </section>
 
