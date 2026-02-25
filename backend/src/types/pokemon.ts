@@ -29,3 +29,9 @@ export type PokemonDocument = {
   speciesUrl: string;
   updatedAt: Date;
 };
+
+export type EvolutionTree = {
+  name: string;
+  imageUrl: string | null;
+  evolvesTo: EvolutionTree[];
+};

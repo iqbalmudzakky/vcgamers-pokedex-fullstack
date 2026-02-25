@@ -1,12 +1,14 @@
 import axios from "axios";
 import { findPokemonByName } from "../repositories/pokemon.repository";
-import {
+import type {
   PokeApiEvolutionChainResponse,
-  PokeApiEvolutionNode,
   PokeApiSpeciesResponse,
 } from "../types/pokeapi";
 import { syncPokemonByName } from "./pokemon-sync.service";
-import { mapEvolutionNode } from "../mappers/evolution.mapper";
+import {
+  collectEvolutionName,
+  mapEvolutionWithImage,
+} from "../mappers/evolution.mapper";
 
 export async function getPokemonDetail(name: string) {
   let pokemon = await findPokemonByName(name);
@@ -23,12 +25,35 @@ export async function getPokemonDetail(name: string) {
   const { data: speciesData } = await axios.get<PokeApiSpeciesResponse>(
     pokemon.speciesUrl,
   );
-  // console.log("🚀 ~ getPokemonDetail ~ speciesData:", speciesData);
 
   const { data: evolutionData } =
     await axios.get<PokeApiEvolutionChainResponse>(
       speciesData.evolution_chain.url,
     );
+
+  const nameSet = new Set<string>();
+  collectEvolutionName(evolutionData.chain, nameSet);
+  const evolutionNames = Array.from(nameSet);
+
+  const spriteMap: Record<string, string | null> = {};
+
+  for (const evoName of evolutionNames) {
+    let evoPokemon = await findPokemonByName(evoName);
+
+    if (!evoPokemon) {
+      try {
+        await syncPokemonByName(evoName);
+        evoPokemon = await findPokemonByName(evoName);
+      } catch (error) {
+        console.log(error);
+        evoPokemon = null;
+      }
+    }
+
+    spriteMap[evoName] = evoPokemon?.sprites.front_default ?? null;
+  }
+
+  const evolutionChain = mapEvolutionWithImage(evolutionData.chain, spriteMap);
 
   return {
     pokemonId: pokemon.pokemonId,
@@ -38,6 +63,6 @@ export async function getPokemonDetail(name: string) {
     sprites: pokemon.sprites,
     types: pokemon.types,
     moves: pokemon.moves.slice(0, 10),
-    evolutionChain: mapEvolutionNode(evolutionData.chain),
+    evolutionChain,
   };
 }

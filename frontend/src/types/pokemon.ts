@@ -29,6 +29,7 @@ export type PokemonListItem = {
 
 export type EvolutionTree = {
   name: string;
+  imageUrl: string | null;
   evolvesTo: EvolutionTree[];
 };
 

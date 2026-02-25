@@ -1,70 +1,75 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import InfiniteScroll from "react-infinite-scroll-component";
+import { useAtom } from "jotai";
 
 import { PokemonCard } from "@/components/pokemon/pokemon-card";
-import { PokemonListItem } from "@/types/pokemon";
 import { getPokemonList } from "@/services/pokemon.services";
 import { useDebounceValues } from "@/hooks/use-debounced-value";
 import { PokemonCardSkeleton } from "@/components/pokemon/pokemon-card-skeleton";
-import InfiniteScroll from "react-infinite-scroll-component";
+import {
+  pokemonItemsAtom,
+  pokemonListStatusAtom,
+  pokemonPaginationAtom,
+  searchInputAtom,
+} from "@/store/atoms/pokemon-list.atom";
+import { ErrorState } from "@/components/common/error-state";
 
 const LIMIT = 8;
 
 export default function HomePage() {
-  const [searchInput, setSearchInput] = useState("");
+  const [searchInput, setSearchInput] = useAtom(searchInputAtom);
   const debouncedSearch = useDebounceValues(searchInput, 400);
 
-  const [items, setItems] = useState<PokemonListItem[]>([]);
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
-  const [initialLoading, setInitialLoading] = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false);
-  const [error, setError] = useState("");
+  const [items, setItems] = useAtom(pokemonItemsAtom);
+  const [pagination, setPagination] = useAtom(pokemonPaginationAtom);
+  const [status, setStatus] = useAtom(pokemonListStatusAtom);
+
+  const { page, hasMore } = pagination;
+  const { initialLoading, loadingMore, error } = status;
+
+  async function loadingFirstPage() {
+    try {
+      setStatus((prev) => ({ ...prev, initialLoading: true, error: "" }));
+      setPagination((prev) => ({ ...prev, page: 1, hasMore: true }));
+
+      const result = await getPokemonList({
+        page: 1,
+        limit: LIMIT,
+        search: debouncedSearch.trim() || undefined,
+      });
+
+      setItems(result.items);
+      setPagination((prev) => ({
+        ...prev,
+        page: 1,
+        hasMore: result.pagination.hasMore,
+      }));
+    } catch (e) {
+      console.error(e);
+      setItems([]);
+      setPagination((prev) => ({ ...prev, page: 1, hasMore: false }));
+      setStatus((prev) => ({
+        ...prev,
+        error: "Failed to fetch pokemon list",
+      }));
+    } finally {
+      setStatus((prev) => ({ ...prev, initialLoading: false }));
+    }
+  }
 
   useEffect(() => {
-    let active = true;
-
-    async function loadingFirstPage() {
-      try {
-        setInitialLoading(true);
-        setError("");
-        setPage(1);
-
-        const result = await getPokemonList({
-          page: 1,
-          limit: LIMIT,
-          search: debouncedSearch.trim() || undefined,
-        });
-
-        if (!active) return;
-        setItems(result.items);
-        setHasMore(result.pagination.hasMore);
-      } catch (e) {
-        if (!active) return;
-        console.error("🚀 ~ loadingFirstPage ~ e:", e);
-        setError("Failed to fecth pokemon list");
-        setItems([]);
-        setHasMore(false);
-      } finally {
-        if (active) setInitialLoading(false);
-      }
-    }
-
-    loadingFirstPage();
-
-    return () => {
-      active = false;
-    };
+    void loadingFirstPage();
   }, [debouncedSearch]);
 
   async function fetchNextPage() {
     if (loadingMore || initialLoading || !hasMore) return;
 
     try {
-      setLoadingMore(true);
-      const nextPage = page + 1;
+      setStatus((prev) => ({ ...prev, loadingMore: true, error: "" }));
 
+      const nextPage = page + 1;
       const result = await getPokemonList({
         page: nextPage,
         limit: LIMIT,
@@ -72,13 +77,16 @@ export default function HomePage() {
       });
 
       setItems((prev) => [...prev, ...result.items]);
-      setPage(nextPage);
-      setHasMore(result.pagination.hasMore);
+      setPagination((prev) => ({
+        ...prev,
+        page: nextPage,
+        hasMore: result.pagination.hasMore,
+      }));
     } catch (e) {
-      console.error("🚀 ~ HomePage ~ e:", e);
-      setError("Failed to load more pokemon");
+      console.error(e);
+      setStatus((prev) => ({ ...prev, error: "Failed to load more pokemon" }));
     } finally {
-      setLoadingMore(false);
+      setStatus((prev) => ({ ...prev, loadingMore: false }));
     }
   }
 
@@ -100,7 +108,11 @@ export default function HomePage() {
           ))}
         </section>
       ) : error ? (
-        <p className="text-red-600">{error}</p>
+        <ErrorState
+          title="Failed to Load Pokemon"
+          message={error}
+          onRetry={loadingFirstPage}
+        />
       ) : items.length === 0 ? (
         <p>No pokemon found</p>
       ) : (
